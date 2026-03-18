@@ -25,12 +25,12 @@ Or visit the [landing page](https://jeremy-prt.github.io/claude-usage-mini/) for
 ## Install
 
 1. Open the `.dmg` and drag the app to `/Applications`
-2. Remove quarantine (required once):
-   ```bash
-   xattr -cr /Applications/Claude\ Usage\ Mini.app
-   ```
-3. Open the app, click the menu bar icon → **Sign in with Claude**
-4. Authorize in your browser, paste the token back in the app
+2. Double-click the app — macOS will block it
+3. Go to **System Settings → Privacy & Security** → click **Open Anyway**
+4. Click the menu bar icon → **Sign in with Claude**
+5. Authorize in your browser, paste the token back in the app
+
+> **Alternative:** run `xattr -cr /Applications/Claude\ Usage\ Mini.app` in Terminal
 
 ## Build from source
 
