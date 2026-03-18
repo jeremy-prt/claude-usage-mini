@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setup - Claude Usage Mini</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+            background: #faf9f7;
+            color: #1a1a1a;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 640px;
+            margin: 0 auto;
+        }
+
+        .lang-toggle {
+            position: fixed;
+            top: 16px;
+            right: 20px;
+            display: flex;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            overflow: hidden;
+            font-size: 0.82rem;
+            font-weight: 500;
+            z-index: 10;
+        }
+        .lang-toggle button {
+            border: none;
+            background: transparent;
+            padding: 6px 14px;
+            cursor: pointer;
+            color: #888;
+            font-family: inherit;
+            font-size: inherit;
+            font-weight: inherit;
+            transition: all 0.15s;
+        }
+        .lang-toggle button.active {
+            background: #1a1a1a;
+            color: white;
+        }
+
+        .back {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: #D97757;
+            text-decoration: none;
+            font-weight: 500;
+            margin-bottom: 32px;
+        }
+        .back:hover { text-decoration: underline; }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 32px;
+            letter-spacing: -0.02em;
+        }
+
+        .step {
+            background: white;
+            border: 1px solid #eee;
+            border-radius: 14px;
+            padding: 24px;
+            margin-bottom: 16px;
+        }
+
+        .step-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #D97757;
+            color: white;
+            font-weight: 700;
+            font-size: 0.85rem;
+            margin-bottom: 12px;
+        }
+
+        .step h2 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .step p {
+            color: #555;
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+
+        .step .hint {
+            margin-top: 8px;
+            color: #888;
+            font-size: 0.88rem;
+        }
+
+        code {
+            background: #f0eeeb;
+            padding: 2px 8px;
+            border-radius: 5px;
+            font-size: 0.88rem;
+            font-family: 'SF Mono', 'Menlo', monospace;
+        }
+
+        .code-block {
+            background: #1a1a1a;
+            color: #e0e0e0;
+            padding: 14px 18px;
+            border-radius: 10px;
+            margin-top: 12px;
+            font-family: 'SF Mono', 'Menlo', monospace;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            overflow-x: auto;
+        }
+
+        .note {
+            background: #fff8f0;
+            border: 1px solid #f0d8c8;
+            border-radius: 10px;
+            padding: 16px;
+            margin-top: 24px;
+            font-size: 0.9rem;
+            color: #8a5a3a;
+            line-height: 1.5;
+        }
+
+        .note strong { color: #D97757; }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 0.8rem;
+            color: #aaa;
+        }
+        .footer a { color: #888; text-decoration: none; }
+        .footer a:hover { color: #D97757; }
+    </style>
+</head>
+<body>
+    <div class="lang-toggle">
+        <button id="btn-fr" class="active" onclick="setLang('fr')">FR</button>
+        <button id="btn-en" onclick="setLang('en')">EN</button>
+    </div>
+
+    <div class="container">
+        <a href="index.html" class="back" data-fr="&larr; Retour" data-en="&larr; Back"></a>
+
+        <h1 data-fr="Guide d'installation" data-en="Setup Guide"></h1>
+
+        <div class="step">
+            <div class="step-number">1</div>
+            <h2 data-fr="Télécharger et installer" data-en="Download & Install"></h2>
+            <p data-fr="Téléchargez le DMG, ouvrez-le et glissez <strong>Claude Usage Mini</strong> dans votre dossier <code>Applications</code>." data-en="Download the DMG, open it, and drag <strong>Claude Usage Mini</strong> into your <code>Applications</code> folder."></p>
+        </div>
+
+        <div class="step">
+            <div class="step-number">2</div>
+            <h2 data-fr="Premier lancement" data-en="First launch"></h2>
+            <p data-fr="L'app n'étant pas signée avec un certificat Apple, macOS va la bloquer la première fois. Pour l'ouvrir :" data-en="Since the app is not signed with an Apple Developer certificate, macOS will block it the first time. To open it:"></p>
+            <p style="margin-top: 8px;">
+                <strong data-fr="Clic droit" data-en="Right-click"></strong> <span data-fr="sur l'app &rarr;" data-en="the app &rarr;"></span> <strong data-fr="Ouvrir" data-en="Open"></strong> <span data-fr="&rarr; cliquez" data-en="&rarr; click"></span> <strong data-fr="Ouvrir" data-en="Open"></strong> <span data-fr="dans la boîte de dialogue." data-en="in the dialog."></span>
+            </p>
+            <p class="hint" data-fr="Vous n'avez besoin de faire ça qu'une seule fois. Ensuite l'app s'ouvre normalement." data-en="You only need to do this once. After that it opens normally."></p>
+        </div>
+
+        <div class="step">
+            <div class="step-number">3</div>
+            <h2 data-fr="Se connecter avec Claude" data-en="Sign in with Claude"></h2>
+            <p data-fr="Cliquez sur l'icône dans votre barre de menu, puis sur <strong>Se connecter avec Claude</strong>. Votre navigateur s'ouvre pour autoriser l'app via OAuth." data-en="Click the icon in your menu bar, then click <strong>Sign in with Claude</strong>. This opens your browser to authorize the app via OAuth."></p>
+            <p class="hint" data-fr="Après l'autorisation, copiez le token <code>code#state</code> depuis le navigateur et collez-le dans l'app." data-en="After authorizing, copy the <code>code#state</code> token from the browser and paste it into the app."></p>
+        </div>
+
+        <div class="step">
+            <div class="step-number">4</div>
+            <h2 data-fr="C'est prêt !" data-en="You're set!"></h2>
+            <p data-fr="Vos barres d'utilisation apparaissent dans la barre de menu. Cliquez sur l'icône pour les détails. Clic droit pour les réglages, déconnexion et quitter." data-en="Your usage bars appear in the menu bar. Click the icon to see details. Right-click for settings, sign out, and quit."></p>
+        </div>
+
+        <div class="note">
+            <strong data-fr="Compiler depuis les sources" data-en="Build from source"></strong><br>
+            <span data-fr="Si vous préférez le compiler vous-même :" data-en="If you prefer to build it yourself:"></span>
+            <div class="code-block">
+git clone https://github.com/jeremy-prt/claude-usage-mini.git
+cd ClaudeUsageMini
+./build-dmg.sh</div>
+            <p style="margin-top: 8px;" data-fr="Nécessite macOS 26+ et Xcode 26+ (Swift 6.2)." data-en="Requires macOS 26+ and Xcode 26+ (Swift 6.2)."></p>
+        </div>
+
+        <div class="footer">
+            <a href="index.html">Claude Usage Mini</a> &middot; <a href="https://github.com/jeremy-prt/claude-usage-mini">GitHub</a>
+        </div>
+    </div>
+
+    <script>
+        function setLang(lang) {
+            document.querySelectorAll('[data-fr]').forEach(el => {
+                el.innerHTML = el.getAttribute('data-' + lang);
+            });
+            document.getElementById('btn-fr').classList.toggle('active', lang === 'fr');
+            document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+            document.documentElement.lang = lang;
+            localStorage.setItem('lang', lang);
+        }
+
+        const saved = localStorage.getItem('lang');
+        const browserLang = navigator.language.startsWith('fr') ? 'fr' : 'en';
+        setLang(saved || browserLang);
+    </script>
+</body>
+</html>
