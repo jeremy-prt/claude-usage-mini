@@ -170,12 +170,10 @@
 
         <div class="step">
             <div class="step-number">2</div>
-            <h2 data-fr="Premier lancement" data-en="First launch"></h2>
-            <p data-fr="L'app n'étant pas signée avec un certificat Apple, macOS va la bloquer la première fois. Pour l'ouvrir :" data-en="Since the app is not signed with an Apple Developer certificate, macOS will block it the first time. To open it:"></p>
-            <p style="margin-top: 8px;">
-                <strong data-fr="Clic droit" data-en="Right-click"></strong> <span data-fr="sur l'app &rarr;" data-en="the app &rarr;"></span> <strong data-fr="Ouvrir" data-en="Open"></strong> <span data-fr="&rarr; cliquez" data-en="&rarr; click"></span> <strong data-fr="Ouvrir" data-en="Open"></strong> <span data-fr="dans la boîte de dialogue." data-en="in the dialog."></span>
-            </p>
-            <p class="hint" data-fr="Vous n'avez besoin de faire ça qu'une seule fois. Ensuite l'app s'ouvre normalement." data-en="You only need to do this once. After that it opens normally."></p>
+            <h2 data-fr="Retirer la quarantaine" data-en="Remove quarantine"></h2>
+            <p data-fr="macOS bloque les apps téléchargées depuis internet. Ouvrez le Terminal et lancez :" data-en="macOS blocks apps downloaded from the internet. Open Terminal and run:"></p>
+            <div class="code-block">xattr -cr /Applications/Claude\ Usage\ Mini.app</div>
+            <p class="hint" data-fr="Ensuite vous pouvez ouvrir l'app normalement. Cette commande n'est nécessaire qu'une seule fois." data-en="Then you can open the app normally. This command is only needed once."></p>
         </div>
 
         <div class="step">

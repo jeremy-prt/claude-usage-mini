@@ -25,8 +25,11 @@ Or visit the [landing page](https://jeremy-prt.github.io/claude-usage-mini/) for
 ## Install
 
 1. Open the `.dmg` and drag the app to `/Applications`
-2. Right-click the app → **Open** (required once for unsigned apps)
-3. Click the menu bar icon → **Sign in with Claude**
+2. Remove quarantine (required once):
+   ```bash
+   xattr -cr /Applications/Claude\ Usage\ Mini.app
+   ```
+3. Open the app, click the menu bar icon → **Sign in with Claude**
 4. Authorize in your browser, paste the token back in the app
 
 ## Build from source

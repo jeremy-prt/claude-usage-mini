@@ -59,6 +59,9 @@ cat > "$APP_BUNDLE/Contents/Info.plist" << 'PLIST'
 </plist>
 PLIST
 
+# Ad-hoc code sign
+codesign --force --deep -s - "$APP_BUNDLE" 2>/dev/null || true
+
 echo ""
 echo "App bundle created at: $APP_BUNDLE"
 echo ""
