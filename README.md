@@ -1,8 +1,8 @@
+# Claude Usage Mini
+
 <p align="center">
   <img src="docs/screenshot.png" width="340" alt="Claude Usage Mini">
 </p>
-
-# Claude Usage Mini
 
 A lightweight macOS menu bar app to monitor your Claude usage in real-time.
 
