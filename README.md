@@ -1,7 +1,7 @@
 # Claude Usage Mini
 
 <p align="center">
-  <img src="docs/screenshot.png" width="340" alt="Claude Usage Mini">
+  <img src="docs/screenshot.webp" width="340" alt="Claude Usage Mini">
 </p>
 
 A lightweight macOS menu bar app to monitor your Claude usage in real-time.
@@ -31,7 +31,7 @@ Or visit the [landing page](https://jeremy-prt.github.io/claude-usage-mini/) for
 5. Authorize in your browser, paste the token back in the app
 
 <p align="center">
-  <img src="docs/open-anyway.png" width="600" alt="System Settings → Privacy & Security → Open Anyway">
+  <img src="docs/open-anyway.webp" width="600" alt="System Settings → Privacy & Security → Open Anyway">
 </p>
 
 > **Why is this needed?** This is an open-source project by an independent developer. The app is not signed with an Apple Developer certificate ($99/year), so macOS blocks it on first launch. The app is fully safe — you can review the source code yourself.
