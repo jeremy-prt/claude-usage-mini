@@ -30,7 +30,13 @@ Or visit the [landing page](https://jeremy-prt.github.io/claude-usage-mini/) for
 4. Click the menu bar icon → **Sign in with Claude**
 5. Authorize in your browser, paste the token back in the app
 
-> **Alternative:** run `xattr -cr /Applications/Claude\ Usage\ Mini.app` in Terminal
+<p align="center">
+  <img src="docs/open-anyway.png" width="600" alt="System Settings → Privacy & Security → Open Anyway">
+</p>
+
+> **Why is this needed?** This is an open-source project by an independent developer. The app is not signed with an Apple Developer certificate ($99/year), so macOS blocks it on first launch. The app is fully safe — you can review the source code yourself.
+
+> **Terminal alternative:** `xattr -cr /Applications/Claude\ Usage\ Mini.app`
 
 ## Build from source
 
