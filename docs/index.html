@@ -132,7 +132,6 @@
 
   /* ---------- la scène macOS ---------- */
 
-  /* .stage ne rogne rien : la popover déborde de l'écran */
   .stage { position: relative; container-type: inline-size; }
 
   .scene {
@@ -191,66 +190,17 @@
   }
   .menubar .item svg { width: 1.9cqw; height: 1.9cqw; fill: #fff7ed; }
 
-  /* ---------- la popover, redessinée en HTML pour rester nette ---------- */
+  /* ---------- la popover de l'app ---------- */
 
-  /* enfant de .stage et non de .scene : elle déborde de l'écran au lieu d'être rognée */
+  /* la vraie capture de l'app, détourée. Placée dans .scene et avant le dock :
+     c'est le dock qui passe devant, comme sur un vrai bureau.
+     L'ombre passe par drop-shadow : box-shadow suivrait le rectangle du PNG,
+     pas la découpe. */
   .popover {
-    position: absolute; right: 7cqw; top: 8.9cqw; width: 38cqw;
-    container-type: inline-size;
-    border-radius: 1.6cqw; padding: 4.6cqw 5cqw 4cqw;
-    background: rgba(247, 242, 234, 0.96);
-    backdrop-filter: blur(24px) saturate(140%); -webkit-backdrop-filter: blur(24px) saturate(140%);
-    border-top: 1px solid rgba(255, 255, 255, 0.6);
-    box-shadow: 0 2.4cqw 4.8cqw -1.2cqw rgba(0, 0, 0, 0.45);
-    color: #2b2724;
+    position: absolute; left: 50%; transform: translateX(-50%);
+    top: 8.6cqw; width: 34.6cqw; height: auto;
+    filter: drop-shadow(0 2.2cqw 3.4cqw rgba(0, 0, 0, 0.42));
   }
-  /* la petite pointe qui vise l'icône dans la barre de menus */
-  .popover::before {
-    content: ""; position: absolute; top: -1.05cqw; left: 35.4%;
-    transform: translateX(-50%);
-    width: 2.4cqw; height: 1.1cqw;
-    background: rgba(247, 242, 234, 0.96);
-    clip-path: polygon(50% 0, 100% 100%, 0 100%);
-  }
-  .pop-head {
-    display: flex; align-items: center; justify-content: space-between; gap: 3cqw;
-    margin-bottom: 5cqw;
-  }
-  .pop-head b { font-size: 4.4cqw; font-weight: 700; letter-spacing: -0.02em; }
-  /* le nom du compte, volontairement illisible comme sur la capture d'origine */
-  .pop-head .acct {
-    font-size: 2.6cqw; color: rgba(43, 39, 36, 0.55);
-    filter: blur(0.35cqw); user-select: none;
-  }
-  .metric + .metric { margin-top: 4.2cqw; }
-  .m-top {
-    display: flex; align-items: baseline; justify-content: space-between; gap: 2cqw;
-    font-size: 3.5cqw; letter-spacing: -0.02em;
-  }
-  .bar {
-    position: relative; height: 1.8cqw; margin: 1.6cqw 0 1.2cqw;
-    border-radius: 0.9cqw; background: rgba(43, 39, 36, 0.14);
-  }
-  .bar i { display: block; height: 100%; border-radius: 0.9cqw; background: #5f574e; }
-  /* le repère du compactage automatique sur la barre de contexte */
-  .bar .tick {
-    position: absolute; top: -0.5cqw; bottom: -0.5cqw; left: 75%;
-    width: 0.35cqw; border-radius: 0.2cqw; background: rgba(43, 39, 36, 0.35);
-  }
-  .m-sub {
-    display: flex; align-items: baseline; justify-content: space-between; gap: 2cqw;
-    font-size: 2.7cqw; font-weight: 600; color: rgba(43, 39, 36, 0.42);
-  }
-  .m-sub + .m-sub { margin-top: 0.8cqw; }
-  .popover hr {
-    border: 0; border-top: 1px solid rgba(43, 39, 36, 0.13); margin: 4.2cqw 0;
-  }
-  .pop-foot {
-    display: flex; align-items: center; justify-content: space-between; gap: 2cqw;
-    font-size: 2.7cqw; font-weight: 600; color: rgba(43, 39, 36, 0.42);
-  }
-  .pop-foot span { display: flex; gap: 3cqw; }
-  .pop-foot svg { width: 3.6cqw; height: 3.6cqw; display: block; }
 
   /* ---------- le Dock ---------- */
 
@@ -383,9 +333,8 @@
     .menubar { font-size: 2.2cqw; gap: 2.4cqw; }
     .menubar svg { width: 2.8cqw; height: 2.8cqw; }
     .menubar .item svg { width: 2.6cqw; height: 2.6cqw; }
-    /* la popover reprend le centre, plus large pour rester lisible */
-    .popover { right: auto; left: 50%; transform: translateX(-50%); top: 14cqw; width: 58cqw; }
-    .popover::before { left: 50%; }
+    /* plus large, sinon les chiffres de la popover deviennent illisibles */
+    .popover { top: 10.5cqw; width: 57cqw; }
     .dock { gap: 1.6cqw; padding: 1.6cqw; border-radius: 3.2cqw; }
     .dock-app { width: 8.6cqw; height: 8.6cqw; }
     .dock-app .tip { font-size: 2.2cqw; padding: 0.7cqw 1.5cqw; border-radius: 1.4cqw; }
@@ -466,6 +415,11 @@
         <span data-fr="jeu. 09:41" data-en="Thu 09:41">jeu. 09:41</span>
       </div>
 
+      <img class="popover" src="assets/popover.png" width="640" height="564"
+           data-alt-fr="La popover de Claude Usage Mini : session 5 h à 13 %, session 7 j à 3 %, fenêtre de contexte à 27 %."
+           data-alt-en="The Claude Usage Mini popover: 5 h session at 13 %, 7 d session at 3 %, context window at 27 %."
+           alt="La popover de Claude Usage Mini : session 5 h à 13 %, session 7 j à 3 %, fenêtre de contexte à 27 %.">
+
       <nav class="dock" aria-label="Mes autres apps macOS">
         <a class="dock-app" href="https://jeremy-prt.github.io/focus-releases/" target="_blank" rel="noopener" aria-label="Focus">
           <img src="assets/dock/focus.png" width="512" height="512" alt="Focus">
@@ -486,46 +440,6 @@
       </nav>
     </div>
 
-    <div class="popover" aria-hidden="true">
-      <div class="pop-head">
-        <b>Claude Usage</b>
-        <span class="acct">jeremy@ulyssoft.com</span>
-      </div>
-
-      <div class="metric">
-        <div class="m-top"><span data-fr="Session 5 h" data-en="5 h session">Session 5 h</span><b>13 %</b></div>
-        <div class="bar"><i style="width:13%"></i></div>
-        <div class="m-sub"><span data-fr="28 min et 23 s restantes" data-en="28 min 23 s left">28 min et 23 s restantes</span></div>
-      </div>
-
-      <div class="metric">
-        <div class="m-top"><span data-fr="Session 7 j" data-en="7 d session">Session 7 j</span><b>3 %</b></div>
-        <div class="bar"><i style="width:3%"></i></div>
-        <div class="m-sub"><span data-fr="5 j et 19 h restantes" data-en="5 d 19 h left">5 j et 19 h restantes</span></div>
-      </div>
-
-      <hr>
-
-      <div class="metric">
-        <div class="m-top"><span data-fr="Fenêtre de contexte" data-en="Context window">Fenêtre de contexte</span><b>27 %</b></div>
-        <div class="bar"><i style="width:27%"></i><span class="tick"></span></div>
-        <div class="m-sub">
-          <span>275K / 1.0M</span>
-          <span data-fr="48 % avant compactage" data-en="48 % before compaction">48 % avant compactage</span>
-        </div>
-        <div class="m-sub"><span>claude-opus-4-6</span></div>
-      </div>
-
-      <hr>
-
-      <div class="pop-foot">
-        <span data-fr="Mis à jour il y a 6 min" data-en="Updated 6 min ago">Mis à jour il y a 6 min</span>
-        <span>
-          <svg viewBox="0 0 24 24" fill="none" stroke="rgba(43,39,36,0.45)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 12a8.5 8.5 0 1 1-2.6-6.1"/><path d="M20.7 3.8v4.4h-4.4"/></svg>
-          <svg viewBox="0 0 24 24" fill="none" stroke="rgba(43,39,36,0.45)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 14.4a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5v.2a2 2 0 1 1-4 0v-.1a1.6 1.6 0 0 0-1-1.5 1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.6 1.6 0 0 0 1.5-1 1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3H9a1.6 1.6 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8V9a1.6 1.6 0 0 0 1.5 1h.2a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z"/></svg>
-        </span>
-      </div>
-    </div>
     </div>
   </section>
 
@@ -631,6 +545,9 @@
   function setLang(lang) {
     document.querySelectorAll("[data-fr]").forEach(el => {
       el.innerHTML = el.getAttribute("data-" + lang);
+    });
+    document.querySelectorAll("[data-alt-fr]").forEach(el => {
+      el.alt = el.getAttribute("data-alt-" + lang);
     });
     document.querySelectorAll(".lang button").forEach(b => {
       b.setAttribute("aria-pressed", String(b.dataset.lang === lang));
