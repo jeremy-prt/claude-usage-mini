@@ -1,300 +1,656 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Claude Usage Mini</title>
-    <link rel="icon" type="image/png" href="favicon.png">
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Claude Usage Mini — Votre usage Claude dans la barre de menus</title>
+<meta name="description" content="Une app macOS légère qui garde votre usage Claude dans la barre de menus : sessions 5 h et 7 j, fenêtre de contexte, alertes. Gratuite, open source, macOS 26+.">
+<link rel="icon" type="image/png" href="icon.png">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Claude Usage Mini">
+<meta property="og:description" content="Votre usage Claude dans la barre de menus. Gratuite, open source, macOS 26+.">
+<meta property="og:image" content="screenshot.webp">
+<meta property="og:url" content="https://jeremy-prt.github.io/claude-usage-mini/">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@600;700;900&display=swap" rel="stylesheet">
+<style>
+  /* Même échelle et même grammaire que les pages de Focus et de Yuzu :
+     SF Pro, encre #292524, boutons r=16. Seuls le fond et le surlignage changent. */
+  :root {
+    --cream: #f3f1fa;
+    --ink: #292524;
+    --mark: #f0a184;
+    --soft: rgba(41, 37, 36, 0.05);
+    --muted-s: rgba(166, 160, 155, 0.9);
+    --muted-l: rgba(121, 113, 107, 0.9);
+    --shell: 1024px;
+  }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
-            background: #faf9f7;
-            color: #1a1a1a;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 24px 20px;
-            overflow: hidden;
-        }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        .container {
-            max-width: 800px;
-            width: 100%;
-            text-align: center;
-        }
+  html { scroll-behavior: smooth; }
 
-        .lang-toggle {
-            position: fixed;
-            top: 16px;
-            right: 20px;
-            display: flex;
-            background: white;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            overflow: hidden;
-            font-size: 0.82rem;
-            font-weight: 500;
-            z-index: 10;
-        }
-        .lang-toggle button {
-            border: none;
-            background: transparent;
-            padding: 6px 14px;
-            cursor: pointer;
-            color: #888;
-            font-family: inherit;
-            font-size: inherit;
-            font-weight: inherit;
-            transition: all 0.15s;
-        }
-        .lang-toggle button.active {
-            background: #1a1a1a;
-            color: white;
-        }
+  body {
+    background: var(--cream);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
+                 "Inter Tight", system-ui, sans-serif;
+    font-weight: 700;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
 
-        .logo {
-            width: 64px;
-            height: auto;
-            margin-bottom: 14px;
-        }
+  img { max-width: 100%; display: block; }
 
-        h1 {
-            font-size: 2.2rem;
-            font-weight: 700;
-            letter-spacing: -0.02em;
-            margin-bottom: 10px;
-        }
+  a { color: inherit; text-decoration: none; }
 
-        .subtitle {
-            font-size: 1.1rem;
-            color: #666;
-            margin-bottom: 28px;
-            line-height: 1.5;
-        }
+  .shell { width: 100%; max-width: var(--shell); margin: 0 auto; padding: 0 24px; }
 
-        .screenshot {
-            width: auto;
-            max-height: 28vh;
-            border-radius: 12px;
-            box-shadow: 0 12px 40px rgba(0,0,0,0.1), 0 2px 6px rgba(0,0,0,0.05);
-            margin-bottom: 32px;
-        }
+  /* ---------- en-tête ---------- */
 
-        .buttons {
-            display: flex;
-            gap: 12px;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin-bottom: 32px;
-        }
+  .site-header {
+    position: sticky; top: 0; z-index: 20;
+    background: rgba(243, 241, 250, 0.95);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    border-bottom: 1px solid rgba(231, 229, 228, 0.05);
+    box-shadow: 0 25px 50px -12px rgba(87, 83, 77, 0.1);
+  }
+  .site-header > div {
+    max-width: 1728px; margin: 0 auto;
+    padding: 18px 32px;
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  }
+  .brand { display: flex; align-items: center; gap: 12px; font-size: 24px; letter-spacing: 0.072px; white-space: nowrap; }
+  .brand img { width: 40px; height: 40px; border-radius: 12px; }
+  .header-actions { display: flex; align-items: center; gap: 4px; }
 
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 11px 26px;
-            border-radius: 10px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            text-decoration: none;
-            transition: background 0.3s, border-color 0.3s;
-        }
+  /* ---------- boutons ---------- */
 
-        .btn-primary { background: #D97757; color: white; }
-        .btn-primary:hover { background: #d06e4e; }
-        .btn-secondary { background: #1a1a1a; color: white; }
-        .btn-secondary:hover { background: #2a2a2a; }
-        .btn-outline { background: transparent; color: #1a1a1a; border: 1.5px solid #ddd; }
-        .btn-outline:hover { border-color: #bbb; }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+    padding: 16px 20px; border-radius: 16px;
+    font-size: 18px; font-weight: 700; letter-spacing: -0.45px; line-height: 28px;
+    font-family: inherit; border: 0; cursor: pointer;
+    transition: transform .16s ease, background-color .16s ease;
+  }
+  .btn svg { width: 26px; height: 26px; flex: none; }
+  .btn-primary {
+    background: var(--ink); color: var(--cream);
+    box-shadow: 0 20px 25px -5px rgba(41, 37, 36, 0.25), 0 8px 10px -6px rgba(41, 37, 36, 0.25);
+  }
+  .btn-ghost { background: var(--soft); color: var(--ink); }
+  .btn:hover { transform: translateY(-1px); }
+  .btn-ghost:hover { background: rgba(41, 37, 36, 0.09); }
+  .btn-quiet { background: none; }
+  .btn-quiet:hover { background: var(--soft); transform: none; }
+  .btn-quiet svg { width: 22px; height: 22px; }
+  .tag {
+    background: var(--ink); color: var(--cream);
+    font-size: 14px; line-height: 20px; letter-spacing: 0.35px;
+    padding: 4px 8px; border-radius: 8px;
+  }
 
-        /* Download button group */
-        .btn-group {
-            display: inline-flex;
-            position: relative;
-        }
-        .btn-group .btn-primary {
-            border-radius: 10px 0 0 10px;
-            padding-right: 20px;
-        }
-        .btn-group .btn-dropdown {
-            background: #D97757;
-            color: white;
-            border: none;
-            border-left: 1px solid rgba(255,255,255,0.2);
-            border-radius: 0 10px 10px 0;
-            padding: 11px 12px;
-            cursor: pointer;
-            font-size: 0.8rem;
-            transition: background 0.3s;
-        }
-        .btn-group .btn-dropdown:hover { background: #d06e4e; }
-        .btn-group .dropdown-menu {
-            display: none;
-            position: absolute;
-            top: calc(100% + 6px);
-            right: 0;
-            background: white;
-            border: 1px solid #e0e0e0;
-            border-radius: 10px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
-            min-width: 200px;
-            z-index: 20;
-            overflow: hidden;
-        }
-        .btn-group .dropdown-menu.open { display: block; }
-        .btn-group .dropdown-menu a {
-            display: block;
-            padding: 10px 16px;
-            text-decoration: none;
-            color: #1a1a1a;
-            font-size: 0.88rem;
-            font-weight: 500;
-            transition: background 0.1s;
-        }
-        .btn-group .dropdown-menu a:hover { background: #f5f5f5; }
-        .btn-group .dropdown-menu .sep {
-            height: 1px;
-            background: #eee;
-            margin: 0;
-        }
+  /* le sélecteur de langue : l'app est bilingue, la page aussi */
+  .lang {
+    display: inline-flex; gap: 2px; margin-right: 8px;
+    background: var(--soft); border-radius: 14px; padding: 4px;
+  }
+  .lang button {
+    border: 0; background: none; font-family: inherit; font-weight: 700;
+    font-size: 15px; letter-spacing: -0.2px; line-height: 20px;
+    padding: 7px 11px; border-radius: 11px; cursor: pointer; color: var(--muted-l);
+    transition: background-color .16s ease, color .16s ease;
+  }
+  .lang button:hover { color: var(--ink); }
+  .lang button[aria-pressed="true"] { background: var(--ink); color: var(--cream); }
 
-        .features {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 14px;
-            margin-bottom: 0;
-            text-align: left;
-        }
+  /* ---------- accroche ---------- */
 
-        .feature {
-            padding: 14px 16px;
-            background: white;
-            border-radius: 10px;
-            border: 1px solid #eee;
-        }
+  .hero { padding-top: clamp(56px, 11vw, 192px); padding-bottom: 80px; }
+  h1 {
+    font-size: clamp(42px, 8.1vw, 96px);
+    line-height: 1; letter-spacing: -0.025em; font-weight: 700;
+    text-wrap: balance;
+  }
+  .mark { position: relative; font-weight: 900; white-space: nowrap; }
+  .mark::before {
+    content: ""; position: absolute; z-index: -1;
+    /* le bas de la barre tombe sur la ligne de base, pas sous les jambages */
+    left: -0.02em; right: -0.02em; bottom: 0.1em; height: 0.45em;
+    background: var(--mark);
+  }
+  .hero-actions {
+    margin-top: 48px;
+    display: flex; align-items: center; flex-wrap: wrap; gap: 28px;
+  }
+  .facts { display: flex; gap: 28px; }
+  .fact { line-height: 1.15; }
+  .fact span { display: block; font-size: 14px; letter-spacing: -0.154px; color: var(--muted-s); }
+  .fact strong { display: block; font-size: 18px; letter-spacing: -0.45px; color: var(--muted-l); }
 
-        .feature-title {
-            font-weight: 600;
-            font-size: 0.88rem;
-            margin-bottom: 4px;
-        }
+  /* ---------- la scène macOS ---------- */
 
-        .feature-desc {
-            font-size: 0.8rem;
-            color: #888;
-            line-height: 1.4;
-        }
+  /* .stage ne rogne rien : la popover déborde de l'écran */
+  .stage { position: relative; container-type: inline-size; }
 
-        .footer {
-            position: fixed;
-            bottom: 16px;
-            left: 0;
-            right: 0;
-            text-align: center;
-            font-size: 0.75rem;
-            color: #aaa;
-        }
-        .footer a { color: #888; text-decoration: none; }
-        .footer a:hover { color: #D97757; }
+  .scene {
+    position: relative; width: 100%; aspect-ratio: 2 / 1;
+    container-type: size;
+    border-radius: 28px; overflow: hidden;
+    /* fond d'écran vert profond : la popover de l'app est crème, elle s'y détache */
+    background:
+      radial-gradient(52cqw 62cqh at 16% 6%, #5eead4 0%, transparent 60%),
+      radial-gradient(48cqw 60cqh at 84% 14%, #0f9b8e 0%, transparent 58%),
+      radial-gradient(70cqw 62cqh at 60% 104%, #14532d 0%, transparent 64%),
+      linear-gradient(150deg, #063b36 0%, #0a4a41 42%, #05282a 100%);
+    box-shadow: 0 40px 80px -24px rgba(41, 37, 36, 0.4);
+  }
 
-        @media (max-width: 700px) {
-            body { height: auto; overflow: auto; }
-            h1 { font-size: 1.6rem; }
-            .features { grid-template-columns: repeat(2, 1fr); }
-            .screenshot { max-height: 30vh; }
-        }
+  /* la pastille d'encoche : dessinée, pas capturée — nette à toutes les tailles */
+  .notch {
+    position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+    height: 3.6cqw; width: 16cqw;
+    background: #000; border-radius: 0 0 1.4cqw 1.4cqw;
+  }
+  .notch::before, .notch::after {
+    content: ""; position: absolute; top: 0; width: 1.2cqw; height: 1.2cqw;
+  }
+  .notch::before {
+    left: -1.2cqw;
+    background: radial-gradient(circle 1.2cqw at 0 100%, transparent 99%, #000 100%);
+  }
+  .notch::after {
+    right: -1.2cqw;
+    background: radial-gradient(circle 1.2cqw at 100% 100%, transparent 99%, #000 100%);
+  }
 
-        @media (max-width: 480px) {
-            .features { grid-template-columns: 1fr; }
-            .lang-toggle { top: 10px; right: 10px; }
-        }
-    </style>
+  .apple-btn {
+    position: absolute; top: 3.1cqw; left: 3.1cqw;
+    width: 4.7cqw; height: 4.7cqw; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(255, 247, 237, 0.15);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  }
+  .apple-btn svg { width: 2.3cqw; height: 2.3cqw; fill: #fff7ed; }
+
+  .menubar {
+    position: absolute; top: 3.1cqw; right: 3.1cqw; height: 4.7cqw;
+    display: flex; align-items: center; gap: 1.9cqw; padding: 0 1.6cqw;
+    border-radius: 2.4cqw;
+    background: rgba(255, 247, 237, 0.15);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    color: #fff7ed; font-size: 1.6cqw; letter-spacing: -0.01em;
+  }
+  .menubar svg { width: 2cqw; height: 2cqw; display: block; }
+  /* l'élément de barre de menus de l'app : c'est lui qui ouvre la popover */
+  .menubar .item {
+    display: flex; align-items: center; gap: 0.7cqw;
+    font-variant-numeric: tabular-nums;
+  }
+  .menubar .item svg { width: 1.9cqw; height: 1.9cqw; fill: #fff7ed; }
+
+  /* ---------- la popover, redessinée en HTML pour rester nette ---------- */
+
+  /* enfant de .stage et non de .scene : elle déborde de l'écran au lieu d'être rognée */
+  .popover {
+    position: absolute; right: 7cqw; top: 8.9cqw; width: 38cqw;
+    container-type: inline-size;
+    border-radius: 1.6cqw; padding: 4.6cqw 5cqw 4cqw;
+    background: rgba(247, 242, 234, 0.96);
+    backdrop-filter: blur(24px) saturate(140%); -webkit-backdrop-filter: blur(24px) saturate(140%);
+    border-top: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow: 0 2.4cqw 4.8cqw -1.2cqw rgba(0, 0, 0, 0.45);
+    color: #2b2724;
+  }
+  /* la petite pointe qui vise l'icône dans la barre de menus */
+  .popover::before {
+    content: ""; position: absolute; top: -1.05cqw; left: 35.4%;
+    transform: translateX(-50%);
+    width: 2.4cqw; height: 1.1cqw;
+    background: rgba(247, 242, 234, 0.96);
+    clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  }
+  .pop-head {
+    display: flex; align-items: center; justify-content: space-between; gap: 3cqw;
+    margin-bottom: 5cqw;
+  }
+  .pop-head b { font-size: 4.4cqw; font-weight: 700; letter-spacing: -0.02em; }
+  /* le nom du compte, volontairement illisible comme sur la capture d'origine */
+  .pop-head .acct {
+    font-size: 2.6cqw; color: rgba(43, 39, 36, 0.55);
+    filter: blur(0.35cqw); user-select: none;
+  }
+  .metric + .metric { margin-top: 4.2cqw; }
+  .m-top {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 2cqw;
+    font-size: 3.5cqw; letter-spacing: -0.02em;
+  }
+  .bar {
+    position: relative; height: 1.8cqw; margin: 1.6cqw 0 1.2cqw;
+    border-radius: 0.9cqw; background: rgba(43, 39, 36, 0.14);
+  }
+  .bar i { display: block; height: 100%; border-radius: 0.9cqw; background: #5f574e; }
+  /* le repère du compactage automatique sur la barre de contexte */
+  .bar .tick {
+    position: absolute; top: -0.5cqw; bottom: -0.5cqw; left: 75%;
+    width: 0.35cqw; border-radius: 0.2cqw; background: rgba(43, 39, 36, 0.35);
+  }
+  .m-sub {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 2cqw;
+    font-size: 2.7cqw; font-weight: 600; color: rgba(43, 39, 36, 0.42);
+  }
+  .m-sub + .m-sub { margin-top: 0.8cqw; }
+  .popover hr {
+    border: 0; border-top: 1px solid rgba(43, 39, 36, 0.13); margin: 4.2cqw 0;
+  }
+  .pop-foot {
+    display: flex; align-items: center; justify-content: space-between; gap: 2cqw;
+    font-size: 2.7cqw; font-weight: 600; color: rgba(43, 39, 36, 0.42);
+  }
+  .pop-foot span { display: flex; gap: 3cqw; }
+  .pop-foot svg { width: 3.6cqw; height: 3.6cqw; display: block; }
+
+  /* ---------- le Dock ---------- */
+
+  .dock {
+    position: absolute; left: 50%; bottom: 5.5cqh; transform: translateX(-50%);
+    display: flex; align-items: flex-end; gap: 1.17cqw; padding: 1.17cqw;
+    border-radius: 2.34cqw;
+    background: rgba(255, 247, 237, 0.15);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    border-top: 1px solid rgba(255, 247, 237, 0.15);
+  }
+  .dock-app {
+    position: relative; display: block; width: 6.25cqw; height: 6.25cqw;
+    transform-origin: bottom center;
+    transition: transform .18s cubic-bezier(.2, .8, .3, 1);
+  }
+  /* juste l'icône survolée, sans entraîner ses voisines */
+  .dock-app:hover, .dock-app:focus-visible { transform: translateY(-0.3cqw) scale(1.1); }
+  .dock-app img {
+    width: 100%; height: 100%; border-radius: 22.5%;
+    filter: drop-shadow(0 0.1cqw 0.11cqw rgba(12, 10, 9, 0.3));
+  }
+  .dock-app:focus-visible { outline: 2px solid #fff7ed; outline-offset: 3px; border-radius: 22.5%; }
+  .dock-app .tip {
+    position: absolute; bottom: calc(100% + 1.6cqw); left: 50%;
+    transform: translate(-50%, 0.4cqw); opacity: 0; pointer-events: none;
+    padding: 0.5cqw 1.1cqw; border-radius: 1cqw; white-space: nowrap;
+    background: rgba(28, 25, 23, 0.72);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    color: #fff7ed; font-size: 1.5cqw; line-height: 1.5;
+    transition: opacity .16s ease, transform .16s ease;
+  }
+  .dock-app:hover .tip, .dock-app:focus-visible .tip { opacity: 1; transform: translate(-50%, 0); }
+
+  /* ---------- ce que fait l'app ---------- */
+
+  .features {
+    padding: 96px 0 0;
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+  }
+  .feature { text-align: center; padding: 0 8px; }
+  .feature svg { width: 72px; height: 72px; margin: 0 auto 20px; stroke: var(--ink); }
+  .feature h2 { font-size: 28px; line-height: 36px; letter-spacing: -0.5px; font-weight: 700; }
+
+  .closing { padding: 96px 0; text-align: center; }
+
+  /* ---------- questions ---------- */
+
+  .faq { padding-bottom: 96px; max-width: 720px; margin: 0 auto; }
+  .faq h2 { font-size: 36px; letter-spacing: -1px; margin-bottom: 24px; text-align: center; }
+  details {
+    background: var(--soft); border-radius: 16px; padding: 18px 20px; margin-bottom: 10px;
+  }
+  summary {
+    font-size: 18px; letter-spacing: -0.45px; cursor: pointer; list-style: none;
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  }
+  summary::-webkit-details-marker { display: none; }
+  summary::after {
+    content: "+"; font-size: 24px; line-height: 1; color: var(--muted-l); flex: none;
+  }
+  details[open] summary::after { content: "–"; }
+  details p {
+    font-size: 17px; line-height: 26px; font-weight: 600; color: var(--muted-l);
+    margin-top: 12px;
+  }
+  details p + p { margin-top: 8px; }
+  details a { text-decoration: underline; text-underline-offset: 3px; }
+  details code {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 15px;
+    background: rgba(41, 37, 36, 0.07); padding: 2px 6px; border-radius: 6px;
+  }
+
+  /* ---------- pied de page ---------- */
+
+  footer { padding-top: 40px; overflow: hidden; }
+  .footer-links {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; justify-content: center;
+    flex-wrap: wrap; gap: 8px;
+    font-size: 16px; color: var(--muted-l);
+  }
+  .footer-links a {
+    padding: 8px 12px; border-radius: 10px;
+    transition: color .16s ease, background-color .16s ease;
+  }
+  .footer-links a:hover { color: var(--ink); background: var(--soft); }
+  /* le mot géant du pied de page : rempli d'un dégradé qui se dissout vers le bas.
+     line-height < 1 fait déborder les glyphes hors de la boîte, par-dessus les
+     liens du dessus — sans pointer-events:none il leur volait le clic. */
+  .wordmark {
+    pointer-events: none;
+    margin-top: 8px; text-align: center; line-height: 0.78;
+    font-size: clamp(96px, 28vw, 352px); font-weight: 900; letter-spacing: -0.045em;
+    user-select: none;
+    background: linear-gradient(180deg,
+      rgba(41, 37, 36, 0.22) 0%,
+      rgba(41, 37, 36, 0.1) 48%,
+      rgba(41, 37, 36, 0) 88%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent; color: transparent;
+  }
+
+  /* ---------- adaptatif ---------- */
+
+  @media (max-width: 900px) {
+    .features { grid-template-columns: repeat(2, 1fr); row-gap: 56px; }
+    .feature h2 { font-size: 24px; line-height: 32px; }
+  }
+
+  @media (max-width: 720px) {
+    .site-header > div { padding: 14px 20px; }
+    .header-actions .btn span { display: none; }
+    .header-actions .btn-primary { padding: 12px 16px; }
+    .btn-quiet { display: none; }
+    .lang button { padding: 6px 9px; font-size: 14px; }
+    /* sinon le titre passe sur trois lignes et la barre de menus bute dans l'encoche */
+    .brand { font-size: 19px; }
+    .brand .wide, .menubar svg.wide { display: none; }
+    .hero-actions { gap: 20px; }
+    .facts { gap: 20px; }
+    /* la scène passe en 4:3 : sinon la popover devient illisible */
+    .scene { aspect-ratio: 4 / 3; border-radius: 20px; }
+    .notch { height: 5cqw; width: 22cqw; }
+    .notch::before, .notch::after { width: 1.8cqw; height: 1.8cqw; }
+    .notch::before { left: -1.8cqw; background: radial-gradient(circle 1.8cqw at 0 100%, transparent 99%, #000 100%); }
+    .notch::after { right: -1.8cqw; background: radial-gradient(circle 1.8cqw at 100% 100%, transparent 99%, #000 100%); }
+    .apple-btn, .menubar { height: 6.4cqw; }
+    .apple-btn { width: 6.4cqw; }
+    .menubar { font-size: 2.2cqw; gap: 2.4cqw; }
+    .menubar svg { width: 2.8cqw; height: 2.8cqw; }
+    .menubar .item svg { width: 2.6cqw; height: 2.6cqw; }
+    /* la popover reprend le centre, plus large pour rester lisible */
+    .popover { right: auto; left: 50%; transform: translateX(-50%); top: 14cqw; width: 58cqw; }
+    .popover::before { left: 50%; }
+    .dock { gap: 1.6cqw; padding: 1.6cqw; border-radius: 3.2cqw; }
+    .dock-app { width: 8.6cqw; height: 8.6cqw; }
+    .dock-app .tip { font-size: 2.2cqw; padding: 0.7cqw 1.5cqw; border-radius: 1.4cqw; }
+    .features { padding-top: 72px; }
+    .closing, .faq { padding-bottom: 72px; }
+    .closing { padding-top: 72px; }
+  }
+
+  @media (max-width: 420px) {
+    .facts { display: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    * { transition-duration: 0.01ms !important; }
+  }
+</style>
 </head>
 <body>
-    <div class="lang-toggle">
-        <button id="btn-fr" class="active" onclick="setLang('fr')">FR</button>
-        <button id="btn-en" onclick="setLang('en')">EN</button>
+
+<header class="site-header">
+  <div>
+    <a class="brand" href="#top"><img src="icon.png" alt="" width="40" height="40"><span>Claude Usage<span class="wide"> Mini</span></span></a>
+    <nav class="header-actions">
+      <div class="lang">
+        <button type="button" data-lang="fr" aria-pressed="true">FR</button>
+        <button type="button" data-lang="en" aria-pressed="false">EN</button>
+      </div>
+      <a class="btn btn-quiet" href="#faq">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <span data-fr="Questions" data-en="Questions">Questions</span>
+      </a>
+      <a class="btn btn-primary" href="https://github.com/jeremy-prt/claude-usage-mini/releases/latest/download/ClaudeUsageMini.dmg">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.246-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></svg>
+        <span data-fr="Télécharger" data-en="Download">Télécharger</span>
+      </a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+  <section class="shell hero">
+    <h1 data-fr="Votre usage Claude,<br>toujours <span class=&quot;mark&quot;>sous les yeux</span>"
+        data-en="Your Claude usage,<br>always <span class=&quot;mark&quot;>in sight</span>">Votre usage Claude,<br>toujours <span class="mark">sous les yeux</span></h1>
+
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="https://github.com/jeremy-prt/claude-usage-mini/releases/latest/download/ClaudeUsageMini.dmg">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.246-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></svg>
+        <span data-fr="Télécharger pour Mac" data-en="Download for Mac">Télécharger pour Mac</span>
+      </a>
+      <a class="btn btn-ghost" href="https://github.com/jeremy-prt/claude-usage-mini/releases">
+        <span data-fr="Versions" data-en="Releases">Versions</span> <span class="tag">v1.0.0</span>
+      </a>
+      <div class="facts">
+        <div class="fact"><span data-fr="Gratuit, open source" data-en="Free, open source">Gratuit, open source</span><strong>macOS 26+</strong></div>
+        <div class="fact"><span data-fr="Interface" data-en="Interface">Interface</span><strong>Français &amp; English</strong></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="shell">
+    <div class="stage">
+    <div class="scene">
+      <div class="notch"></div>
+
+      <div class="apple-btn">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.246-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></svg>
+      </div>
+
+      <div class="menubar">
+        <span class="item">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 2h2v7.1l3.6-6.2 1.7 1-3.6 6.2 6.2-3.6 1 1.7-6.2 3.6H22v2h-7.1l6.2 3.6-1 1.7-6.2-3.6 3.6 6.2-1.7 1L13 16.9V24h-2v-7.1l-3.6 6.2-1.7-1 3.6-6.2-6.2 3.6-1-1.7L8.3 14H2v-2h6.3L2.1 8.4l1-1.7 6.2 3.6L5.7 4.1l1.7-1L11 9.3z"/></svg>
+          13 %
+        </span>
+        <svg class="wide" viewBox="0 0 24 24" fill="none" stroke="#fff7ed" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M2 8.5a15 15 0 0 1 20 0M5 12a10 10 0 0 1 14 0M8.5 15.5a5 5 0 0 1 7 0"/><circle cx="12" cy="19" r="1" fill="#fff7ed"/></svg>
+        <svg class="wide" viewBox="0 0 24 24" fill="none" stroke="#fff7ed" stroke-width="2" aria-hidden="true"><rect x="2" y="8" width="16" height="8" rx="2.4"/><rect x="4.4" y="10.4" width="9" height="3.2" rx="1" fill="#fff7ed" stroke="none"/><path d="M20.6 10.6v2.8" stroke-linecap="round"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff7ed" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="2.4" fill="#fff7ed"/><circle cx="15" cy="17" r="2.4" fill="#fff7ed"/></svg>
+        <span data-fr="jeu. 09:41" data-en="Thu 09:41">jeu. 09:41</span>
+      </div>
+
+      <nav class="dock" aria-label="Mes autres apps macOS">
+        <a class="dock-app" href="https://jeremy-prt.github.io/focus-releases/" target="_blank" rel="noopener" aria-label="Focus">
+          <img src="assets/dock/focus.png" width="512" height="512" alt="Focus">
+          <span class="tip" aria-hidden="true">Focus</span>
+        </a>
+        <a class="dock-app" href="https://jeremy-prt.github.io/yuzu-releases/" target="_blank" rel="noopener" aria-label="Yuzu">
+          <img src="assets/dock/yuzu.png" width="512" height="512" alt="Yuzu">
+          <span class="tip" aria-hidden="true">Yuzu</span>
+        </a>
+        <a class="dock-app" href="https://orby.live/" target="_blank" rel="noopener" aria-label="Orby">
+          <img src="assets/dock/orby.png" width="512" height="512" alt="Orby">
+          <span class="tip" aria-hidden="true">Orby</span>
+        </a>
+        <a class="dock-app" href="https://github.com/jeremy-prt/claude-usage-mini/releases/latest/download/ClaudeUsageMini.dmg" aria-label="Claude Usage Mini">
+          <img src="assets/dock/claude-usage.png" width="512" height="512" alt="Claude Usage Mini">
+          <span class="tip" aria-hidden="true">Claude Usage Mini</span>
+        </a>
+      </nav>
     </div>
 
-    <div class="container">
-        <img src="logo.webp" class="logo" alt="Claude Usage Mini logo">
+    <div class="popover" aria-hidden="true">
+      <div class="pop-head">
+        <b>Claude Usage</b>
+        <span class="acct">jeremy@ulyssoft.com</span>
+      </div>
 
-        <h1>Claude Usage Mini</h1>
-        <p class="subtitle" data-fr="Surveillez votre utilisation Claude depuis la barre de menu macOS.<br>Léger, natif, élégant." data-en="Monitor your Claude usage from the macOS menu bar.<br>Lightweight, native, beautiful."></p>
+      <div class="metric">
+        <div class="m-top"><span data-fr="Session 5 h" data-en="5 h session">Session 5 h</span><b>13 %</b></div>
+        <div class="bar"><i style="width:13%"></i></div>
+        <div class="m-sub"><span data-fr="28 min et 23 s restantes" data-en="28 min 23 s left">28 min et 23 s restantes</span></div>
+      </div>
 
-        <img src="screenshot.webp" alt="Claude Usage Mini screenshot" class="screenshot">
+      <div class="metric">
+        <div class="m-top"><span data-fr="Session 7 j" data-en="7 d session">Session 7 j</span><b>3 %</b></div>
+        <div class="bar"><i style="width:3%"></i></div>
+        <div class="m-sub"><span data-fr="5 j et 19 h restantes" data-en="5 d 19 h left">5 j et 19 h restantes</span></div>
+      </div>
 
-        <div class="buttons">
-            <div class="btn-group">
-                <a href="https://github.com/jeremy-prt/claude-usage-mini/releases/latest/download/ClaudeUsageMini.dmg" class="btn btn-primary">
-                    <span data-fr="Télécharger .DMG" data-en="Download .DMG"></span>
-                </a>
-                <button class="btn-dropdown" onclick="this.nextElementSibling.classList.toggle('open')">&#9662;</button>
-                <div class="dropdown-menu">
-                    <a href="https://github.com/jeremy-prt/claude-usage-mini/releases/latest/download/ClaudeUsageMini.dmg" data-fr="Téléchargement direct" data-en="Direct download"></a>
-                    <div class="sep"></div>
-                    <a href="https://github.com/jeremy-prt/claude-usage-mini/releases" data-fr="Voir toutes les versions" data-en="All releases"></a>
-                </div>
-            </div>
-            <a href="https://github.com/jeremy-prt/claude-usage-mini" class="btn btn-secondary">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/></svg>
-                GitHub
-            </a>
-            <a href="setup.html" class="btn btn-outline">
-                <span data-fr="Comment installer ?" data-en="How to install?"></span>
-            </a>
+      <hr>
+
+      <div class="metric">
+        <div class="m-top"><span data-fr="Fenêtre de contexte" data-en="Context window">Fenêtre de contexte</span><b>27 %</b></div>
+        <div class="bar"><i style="width:27%"></i><span class="tick"></span></div>
+        <div class="m-sub">
+          <span>275K / 1.0M</span>
+          <span data-fr="48 % avant compactage" data-en="48 % before compaction">48 % avant compactage</span>
         </div>
+        <div class="m-sub"><span>claude-opus-4-6</span></div>
+      </div>
 
-        <div class="features">
-            <div class="feature">
-                <div class="feature-title" data-fr="Sessions 5h & 7j" data-en="5h & 7d Sessions"></div>
-                <div class="feature-desc" data-fr="Suivez vos fenêtres d'utilisation en un coup d'oeil." data-en="Track your rolling usage windows at a glance."></div>
-            </div>
-            <div class="feature">
-                <div class="feature-title" data-fr="Fenêtre de contexte" data-en="Context Window"></div>
-                <div class="feature-desc" data-fr="Voyez le remplissage avant le compactage auto." data-en="See context fill before auto-compact."></div>
-            </div>
-            <div class="feature">
-                <div class="feature-title" data-fr="Notifications" data-en="Notifications"></div>
-                <div class="feature-desc" data-fr="Alertes quand vous approchez vos limites." data-en="Alerts when approaching usage limits."></div>
-            </div>
-            <div class="feature">
-                <div class="feature-title" data-fr="Français & English" data-en="Français & English"></div>
-                <div class="feature-desc" data-fr="Interface disponible dans les deux langues." data-en="Full interface in both languages."></div>
-            </div>
-        </div>
+      <hr>
 
-        <div class="footer">
-            macOS 26+ &middot; Open Source &middot; <a href="https://github.com/jeremy-prt/claude-usage-mini/blob/main/LICENSE">BSD-2-Clause</a>
-            &middot; <span data-fr="Basé sur" data-en="Based on"></span> <a href="https://github.com/Blimp-Labs/claude-usage-bar">claude-usage-bar</a>
-        </div>
+      <div class="pop-foot">
+        <span data-fr="Mis à jour il y a 6 min" data-en="Updated 6 min ago">Mis à jour il y a 6 min</span>
+        <span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="rgba(43,39,36,0.45)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 12a8.5 8.5 0 1 1-2.6-6.1"/><path d="M20.7 3.8v4.4h-4.4"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="rgba(43,39,36,0.45)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 14.4a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5v.2a2 2 0 1 1-4 0v-.1a1.6 1.6 0 0 0-1-1.5 1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.6 1.6 0 0 0 1.5-1 1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3H9a1.6 1.6 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8V9a1.6 1.6 0 0 0 1.5 1h.2a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z"/></svg>
+        </span>
+      </div>
     </div>
+    </div>
+  </section>
 
-    <script>
-        function setLang(lang) {
-            document.querySelectorAll('[data-fr]').forEach(el => {
-                el.innerHTML = el.getAttribute('data-' + lang);
-            });
-            document.getElementById('btn-fr').classList.toggle('active', lang === 'fr');
-            document.getElementById('btn-en').classList.toggle('active', lang === 'en');
-            document.documentElement.lang = lang;
-            localStorage.setItem('lang', lang);
-        }
+  <section class="shell features">
+    <div class="feature">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="9"/>
+        <path d="M12 6.6V12l3.6 2.4"/>
+      </svg>
+      <h2 data-fr="Sessions 5 h et 7 j" data-en="5 h and 7 d sessions">Sessions 5 h et 7 j</h2>
+    </div>
+    <div class="feature">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M3.4 17.5a9 9 0 1 1 17.2 0"/>
+        <path d="M12 17.5 16.2 11"/>
+        <circle cx="12" cy="17.5" r="1.1"/>
+      </svg>
+      <h2 data-fr="Fenêtre de contexte" data-en="Context window">Fenêtre de contexte</h2>
+    </div>
+    <div class="feature">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M18.5 15.5V10a6.5 6.5 0 1 0-13 0v5.5L4 18h16z"/>
+        <path d="M10 21h4"/>
+      </svg>
+      <h2 data-fr="Alerte avant la limite" data-en="Alert before the limit">Alerte avant la limite</h2>
+    </div>
+    <div class="feature">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="9"/>
+        <path d="M3.2 9.5h17.6M3.2 14.5h17.6"/>
+        <path d="M12 3a15 15 0 0 1 0 18a15 15 0 0 1 0-18z"/>
+      </svg>
+      <h2>Français &amp; English</h2>
+    </div>
+  </section>
 
-        const saved = localStorage.getItem('lang');
-        const browserLang = navigator.language.startsWith('fr') ? 'fr' : 'en';
-        setLang(saved || browserLang);
+  <section class="shell closing">
+    <a class="btn btn-primary" href="https://github.com/jeremy-prt/claude-usage-mini/releases/latest/download/ClaudeUsageMini.dmg">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.246-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></svg>
+      <span data-fr="Télécharger pour Mac" data-en="Download for Mac">Télécharger pour Mac</span>
+    </a>
+  </section>
 
-        // Close dropdown on click outside
-        document.addEventListener('click', e => {
-            if (!e.target.closest('.btn-group')) {
-                document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('open'));
-            }
-        });
-    </script>
+  <section class="shell faq" id="faq">
+    <h2 data-fr="Questions" data-en="Questions">Questions</h2>
+
+    <details>
+      <summary data-fr="macOS refuse d'ouvrir l'app" data-en="macOS refuses to open the app">macOS refuse d'ouvrir l'app</summary>
+      <p data-fr="L'app n'est pas signée par un certificat Apple Developer (99 $ par an) : au premier lancement macOS propose de la mettre à la corbeille. Cliquer « Terminé »."
+         data-en="The app is not signed with an Apple Developer certificate ($99 a year), so on first launch macOS offers to move it to the Trash. Click “Done”.">L'app n'est pas signée par un certificat Apple Developer (99 $ par an) : au premier lancement macOS propose de la mettre à la corbeille. Cliquer « Terminé ».</p>
+      <p data-fr="Puis ouvrir <strong>Réglages Système &gt; Confidentialité et sécurité</strong>, descendre tout en bas, cliquer <strong>« Ouvrir quand même »</strong> et confirmer. C'est à faire une seule fois. En Terminal : <code>xattr -cr /Applications/Claude\ Usage\ Mini.app</code>."
+         data-en="Then open <strong>System Settings &gt; Privacy &amp; Security</strong>, scroll to the bottom, click <strong>“Open Anyway”</strong> and confirm. This is only needed once. From Terminal: <code>xattr -cr /Applications/Claude\ Usage\ Mini.app</code>.">Puis ouvrir <strong>Réglages Système &gt; Confidentialité et sécurité</strong>, descendre tout en bas, cliquer <strong>« Ouvrir quand même »</strong> et confirmer. C'est à faire une seule fois. En Terminal : <code>xattr -cr /Applications/Claude\ Usage\ Mini.app</code>.</p>
+    </details>
+
+    <details>
+      <summary data-fr="Comment connecter mon compte ?" data-en="How do I connect my account?">Comment connecter mon compte ?</summary>
+      <p data-fr="Cliquer l'icône dans la barre de menus, puis « Se connecter avec Claude ». Le navigateur s'ouvre pour autoriser l'app en OAuth ; il reste à recoller le jeton <code>code#state</code> dans l'app."
+         data-en="Click the menu bar icon, then “Sign in with Claude”. Your browser opens to authorise the app over OAuth; paste the <code>code#state</code> token back into the app.">Cliquer l'icône dans la barre de menus, puis « Se connecter avec Claude ». Le navigateur s'ouvre pour autoriser l'app en OAuth ; il reste à recoller le jeton <code>code#state</code> dans l'app.</p>
+      <p data-fr="Le <a href=&quot;setup.html&quot;>guide d'installation</a> détaille chaque étape en images."
+         data-en="The <a href=&quot;setup.html&quot;>setup guide</a> walks through every step with screenshots.">Le <a href="setup.html">guide d'installation</a> détaille chaque étape en images.</p>
+    </details>
+
+    <details>
+      <summary data-fr="D'où viennent les chiffres ?" data-en="Where do the numbers come from?">D'où viennent les chiffres ?</summary>
+      <p data-fr="L'usage vient de l'API OAuth d'Anthropic (<code>/api/oauth/usage</code>), la même source que le tableau de bord officiel de Claude."
+         data-en="Usage comes from the Anthropic OAuth API (<code>/api/oauth/usage</code>), the same source as the official Claude dashboard.">L'usage vient de l'API OAuth d'Anthropic (<code>/api/oauth/usage</code>), la même source que le tableau de bord officiel de Claude.</p>
+      <p data-fr="La fenêtre de contexte est estimée en lisant vos fichiers de session Claude Code, en local, dans <code>~/.claude/projects/</code>. Rien n'est envoyé ailleurs."
+         data-en="The context window is estimated by reading your Claude Code session files locally, in <code>~/.claude/projects/</code>. Nothing is sent anywhere else.">La fenêtre de contexte est estimée en lisant vos fichiers de session Claude Code, en local, dans <code>~/.claude/projects/</code>. Rien n'est envoyé ailleurs.</p>
+    </details>
+
+    <details>
+      <summary data-fr="Quelle configuration ?" data-en="What do I need?">Quelle configuration ?</summary>
+      <p data-fr="macOS 26 Tahoe minimum. Pour compiler soi-même : Xcode 26+ (Swift 6.2), puis <code>./build-app.sh</code>."
+         data-en="macOS 26 Tahoe minimum. To build it yourself: Xcode 26+ (Swift 6.2), then <code>./build-app.sh</code>.">macOS 26 Tahoe minimum. Pour compiler soi-même : Xcode 26+ (Swift 6.2), puis <code>./build-app.sh</code>.</p>
+    </details>
+
+    <details>
+      <summary data-fr="C'est payant ?" data-en="Is it paid?">C'est payant ?</summary>
+      <p data-fr="Non : gratuit et open source, sous licence BSD-2-Clause. Le projet part de <a href=&quot;https://github.com/Blimp-Labs/claude-usage-bar&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;>claude-usage-bar</a> de Krystian."
+         data-en="No: free and open source, under the BSD-2-Clause licence. The project builds on <a href=&quot;https://github.com/Blimp-Labs/claude-usage-bar&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;>claude-usage-bar</a> by Krystian.">Non : gratuit et open source, sous licence BSD-2-Clause. Le projet part de <a href="https://github.com/Blimp-Labs/claude-usage-bar" target="_blank" rel="noopener">claude-usage-bar</a> de Krystian.</p>
+    </details>
+  </section>
+</main>
+
+<footer>
+  <div class="footer-links">
+    <a href="https://github.com/jeremy-prt/claude-usage-mini" target="_blank" rel="noopener" data-fr="Dépôt" data-en="Repository">Dépôt</a>
+    <a href="https://github.com/jeremy-prt/claude-usage-mini/releases" target="_blank" rel="noopener" data-fr="Versions" data-en="Releases">Versions</a>
+    <a href="setup.html" data-fr="Installation" data-en="Setup">Installation</a>
+    <a href="https://portfolio2025-rose-seven.vercel.app/" target="_blank" rel="noopener" data-fr="Fait par Jérémy" data-en="Made by Jérémy">Fait par Jérémy</a>
+  </div>
+  <div class="wordmark" aria-hidden="true">Usage</div>
+</footer>
+
+<script>
+  // L'app est bilingue, la page l'est aussi : chaque nœud porte ses deux versions.
+  // Un nœud ne doit jamais contenir un autre nœud traduit — innerHTML l'écraserait.
+  const TITLES = {
+    fr: "Claude Usage Mini — Votre usage Claude dans la barre de menus",
+    en: "Claude Usage Mini — Your Claude usage in the menu bar"
+  };
+
+  function setLang(lang) {
+    document.querySelectorAll("[data-fr]").forEach(el => {
+      el.innerHTML = el.getAttribute("data-" + lang);
+    });
+    document.querySelectorAll(".lang button").forEach(b => {
+      b.setAttribute("aria-pressed", String(b.dataset.lang === lang));
+    });
+    document.documentElement.lang = lang;
+    document.title = TITLES[lang];
+    try { localStorage.setItem("lang", lang); } catch (e) { /* mode privé */ }
+  }
+
+  document.querySelectorAll(".lang button").forEach(b => {
+    b.addEventListener("click", () => setLang(b.dataset.lang));
+  });
+
+  let saved = null;
+  try { saved = localStorage.getItem("lang"); } catch (e) { /* mode privé */ }
+  // un localStorage trafiqué viderait tous les textes : on ne garde que fr/en
+  setLang(saved === "fr" || saved === "en"
+    ? saved
+    : (navigator.language.startsWith("fr") ? "fr" : "en"));
+</script>
+
 </body>
 </html>
